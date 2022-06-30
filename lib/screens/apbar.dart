@@ -16,6 +16,8 @@ class ApBar extends StatefulWidget {
 
 class _ApBarState extends State<ApBar> {
   File? profilepic;
+  String downloadurl = '';
+
   SelectImage() async {
     try {
       XFile? selectedImage =
@@ -44,7 +46,7 @@ class _ApBarState extends State<ApBar> {
           .putFile(profilepic!);
 
       TaskSnapshot taskSnapshot = await uploadTask;
-      String downloadurl = await taskSnapshot.ref.getDownloadURL();
+      downloadurl = await taskSnapshot.ref.getDownloadURL();
 
       FirebaseFirestore.instance.collection("Users").add({
         "ProfilePic": downloadurl,
@@ -67,8 +69,9 @@ class _ApBarState extends State<ApBar> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: ListView(
+        child: Column(
           children: [
+            Container(),
             Column(
               children: [
                 InkWell(
@@ -83,47 +86,51 @@ class _ApBarState extends State<ApBar> {
                   ),
                 ),
                 MaterialButton(
-                    color: Colors.red,
-                    child: Text("UpLoad"),
-                    onPressed: () {
-                      UpLoad();
-                    }),
+                  color: Colors.red,
+                  child: Text("UpLoad"),
+                  onPressed: () {
+                    UpLoad();
+                  },
+                ),
               ],
             ),
-            Container(
-              width: double.infinity,
-              height: 500,
-              child:StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection("Users").snapshots(),
-                builder: (context,snapshot){
-                  if(snapshot.hasData){
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: ScrollPhysics(),
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (context,index){
-                          QueryDocumentSnapshot a = snapshot.data!.docs[index];
-                          return ListTile(
-                            title: Text("Abdul Khaliq"),
-                            subtitle: Text("Engineer"),
-                            leading: IconButton(
-                              onPressed: (){},
-                               icon:Icon(Icons.delete),
-                               ),
-                               trailing: CircleAvatar(
-                                radius: 30,
-                                backgroundImage: NetworkImage(a["profilepic"]),
-                               ),
-                          );
-                        }
-                        );
-                  }
-                  else{
-                    return Center(child: CircularProgressIndicator(),);
-                  }
-                }
-              )
+            Visibility(
+              visible: downloadurl != '',
+              child: SizedBox(width: 200, child: Image.network(downloadurl)),
             ),
+            // Expanded(
+            //   child: StreamBuilder<QuerySnapshot>(
+            //     stream:
+            //         FirebaseFirestore.instance.collection("Users").snapshots(),
+            //     builder: (context, snapshot) {
+            //       if (snapshot.hasData) {
+            //         return ListView.builder(
+            //             shrinkWrap: true,
+            //             physics: ScrollPhysics(),
+            //             itemCount: snapshot.data!.docs.length,
+            //             itemBuilder: (context, index) {
+            //               QueryDocumentSnapshot a = snapshot.data!.docs[index];
+            //               return ListTile(
+            //                 title: Text("Abdul Khaliq"),
+            //                 subtitle: Text("Engineer"),
+            //                 leading: IconButton(
+            //                   onPressed: () {},
+            //                   icon: Icon(Icons.delete),
+            //                 ),
+            //                 trailing: CircleAvatar(
+            //                   radius: 30,
+            //                   backgroundImage: NetworkImage(a["ProfilePic"]),
+            //                 ),
+            //               );
+            //             });
+            //       } else {
+            //         return Center(
+            //           child: CircularProgressIndicator(),
+            //         );
+            //       }
+            //     },
+            //   ),
+            // ),
           ],
         ),
       ),
